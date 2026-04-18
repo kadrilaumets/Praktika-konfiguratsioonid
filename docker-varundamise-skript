@@ -8,7 +8,7 @@ set -e
 DATE=$(date +%Y-%m-%d_%H-%M-%S)
 
 # Veebilehe failide asukoht
-WEBROOT="/var/www/veeb.kohvi.praktika"
+#WEBROOT="/var/www/veeb.kohvi.praktika"
 
 # Varukoopiate kaust
 BACKUP_DIR="/home/kohvi-docker/backups/website"
@@ -21,6 +21,10 @@ TMP_DIR="/tmp/website_backup_$DATE"
 
 # Varukoopia failinimi
 ARCHIVE_NAME="website_backup_$DATE.tar.gz"
+
+WEB_SERVER_USER="kohvi1"
+WEB_SERVER_HOST="172.20.30.4"
+WEBROOT="var/www/veeb.kohvi.praktika"
 
 # =========================
 # ETTEVALMISTUS
