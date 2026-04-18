@@ -15,9 +15,6 @@ BACKUP_DIR="/opt/backups/website"
 
 # Andmebaasi andmed
 DB_NAME="wordpress"
-DB_USER="wpuser"
-DB_PASS="salasona"
-DB_HOST="localhost"
 
 # Ajutine töökaust
 TMP_DIR="/tmp/website_backup_$DATE"
@@ -43,7 +40,7 @@ cp -a "$WEBROOT" "$TMP_DIR/files/"
 # ANDMEBAASI DUMP
 # =========================
 mkdir -p "$TMP_DIR/database"
-mysqldump -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$TMP_DIR/database/${DB_NAME}.sql"
+mysqldump --defaults-file=/home/kohvi-docker/.my.cnf "$DB_NAME" > "$TMP_DIR/database/${DB_NAME}.sql"
 
 # =========================
 # PAKKIMINE
