@@ -1,0 +1,64 @@
+#!/bin/bash
+
+set -e
+
+# =========================
+# SEADISTUSED
+# =========================
+DATE=$(date +%Y-%m-%d_%H-%M-%S)
+
+# Veebilehe failide asukoht
+WEBROOT="/var/www/html"
+
+# Varukoopiate kaust
+BACKUP_DIR="/opt/backups/website"
+
+# Andmebaasi andmed
+DB_NAME="wordpress"
+DB_USER="wpuser"
+DB_PASS="salasona"
+DB_HOST="localhost"
+
+# Ajutine töökaust
+TMP_DIR="/tmp/website_backup_$DATE"
+
+# Varukoopia failinimi
+ARCHIVE_NAME="website_backup_$DATE.tar.gz"
+
+# =========================
+# ETTEVALMISTUS
+# =========================
+mkdir -p "$BACKUP_DIR"
+mkdir -p "$TMP_DIR"
+
+echo "Alustan varundust: $DATE"
+
+# =========================
+# FAILIDE KOPEERIMINE
+# =========================
+mkdir -p "$TMP_DIR/files"
+cp -a "$WEBROOT" "$TMP_DIR/files/"
+
+# =========================
+# ANDMEBAASI DUMP
+# =========================
+mkdir -p "$TMP_DIR/database"
+mysqldump -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$TMP_DIR/database/${DB_NAME}.sql"
+
+# =========================
+# PAKKIMINE
+# =========================
+tar -czf "$BACKUP_DIR/$ARCHIVE_NAME" -C "$TMP_DIR" .
+
+# =========================
+# AJUTISTE FAILIDE KUSTUTAMINE
+# =========================
+rm -rf "$TMP_DIR"
+
+# =========================
+# HOIA ALLES AINULT 5 VIIMAST
+# =========================
+cd "$BACKUP_DIR"
+ls -1t website_backup_*.tar.gz | tail -n +6 | xargs -r rm -f
+
+echo "Varundus valmis: $BACKUP_DIR/$ARCHIVE_NAME"
