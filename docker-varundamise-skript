@@ -8,10 +8,10 @@ set -e
 DATE=$(date +%Y-%m-%d_%H-%M-%S)
 
 # Veebilehe failide asukoht
-WEBROOT="/var/www/html"
+WEBROOT="/var/www/veeb.kohvi.praktika"
 
 # Varukoopiate kaust
-BACKUP_DIR="/opt/backups/website"
+BACKUP_DIR="/home/kohvi-docker/backups/website"
 
 # Andmebaasi andmed
 DB_NAME="wordpress"
