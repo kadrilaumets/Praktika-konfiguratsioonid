@@ -1,0 +1,40 @@
+Import-Module ActiveDirectory
+
+$csvPath = "C:\Temp\kasutajad.csv"
+$domainDN = "DC=sinunimi,DC=local"
+
+$users = Import-Csv -Path $csvPath
+
+foreach ($user in $users) {
+
+    $fullName = "$($user.Eesnimi) $($user.Perenimi)"
+    $ouPath = "OU=$($user.OU),$domainDN"
+
+    if (-not (Get-ADOrganizationalUnit -LDAPFilter "(ou=$($user.OU))" -ErrorAction SilentlyContinue)) {
+        New-ADOrganizationalUnit -Name $user.OU -Path $domainDN
+    }
+
+    if (-not (Get-ADUser -Filter "SamAccountName -eq '$($user.Kasutajanimi)'" -ErrorAction SilentlyContinue)) {
+
+        New-ADUser `
+        -Name $fullName `
+        -GivenName $user.Eesnimi `
+        -Surname $user.Perenimi `
+        -SamAccountName $user.Kasutajanimi `
+        -UserPrincipalName "$($user.Kasutajanimi)@sinunimi.local" `
+        -Path $ouPath `
+        -AccountPassword (ConvertTo-SecureString $user.Parool -AsPlainText -Force) `
+        -Enabled $true `
+        -ChangePasswordAtLogon $false
+
+        Write-Host "Loodud kasutaja: $fullName"
+    }
+    else {
+        Write-Host "Kasutaja juba olemas: $($user.Kasutajanimi)"
+    }
+}
+Käivita skript:
+Set-ExecutionPolicy RemoteSigned -Force
+C:\Temp\import-kasutajad.ps1
+Kontroll:
+Get-ADUser -Filter * -SearchBase "OU=Kasutajad,DC=sinunimi,DC=local"
