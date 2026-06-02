@@ -1,0 +1,35 @@
+Import-Module ActiveDirectory
+
+$domainDN = "DC=klaumets,DC=local"
+$parentOU = "OU=Kasutajad,$domainDN"
+$csvPath = "C:\kasutajad.csv"
+
+$users = Import-Csv $csvPath -Delimiter ";"
+
+foreach ($ou in ($users | Select-Object -ExpandProperty OU -Unique)) {
+    $ouPath = "OU=$ou,$parentOU"
+
+    if (-not (Get-ADOrganizationalUnit -LDAPFilter "(ou=$ou)" -SearchBase $parentOU -ErrorAction SilentlyContinue)) {
+        New-ADOrganizationalUnit -Name $ou -Path $parentOU
+        Write-Host "Loodi OU: $ou"
+    }
+}
+
+foreach ($user in $users) {
+    $fullName = "$($user.Eesnimi) $($user.Perenimi)"
+    $targetOU = "OU=$($user.OU),$parentOU"
+
+    if (-not (Get-ADUser -Filter "SamAccountName -eq '$($user.kasutajanimi)'" -ErrorAction SilentlyContinue)) {
+        New-ADUser `
+            -Name $fullName `
+            -GivenName $user.Eesnimi `
+            -Surname $user.Perenimi `
+            -SamAccountName $user.kasutajanimi `
+            -UserPrincipalName "$($user.kasutajanimi)@klaumets.local" `
+            -AccountPassword (ConvertTo-SecureString $user.Parool -AsPlainText -Force) `
+            -Enabled $true `
+            -Path $targetOU
+
+        Write-Host "Loodi kasutaja: $fullName"
+    }
+}
